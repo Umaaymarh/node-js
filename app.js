@@ -4,8 +4,7 @@ const mongoose = require('mongoose');
 const Blog = require('./model/blogSchema');
 // express app
 const app = express();
-const db = 'mongodb+srv://Umaima:auwalhajara@cluster0.qbt0pxi.mongodb.net/Node?retryWrites=true&w=majority'
-// const db = 'mongodb://127.0.0.1:27017/Node?directConnection=true&serverSelectionTimeoutMS=2000&appName=mongosh+2.1.0'
+const db = 'mongodb://127.0.0.1:27017/Node?directConnection=true&serverSelectionTimeoutMS=2000&appName=mongosh+2.1.0'
 mongoose.connect(db, {useNewUrlParser: true, useUnifiedTopology:true})
 .then((result)=> {
     console.log('listening to port 8080');
