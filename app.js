@@ -4,22 +4,22 @@ const mongoose = require('mongoose');
 const Blog = require('./model/blogSchema');
 // express app
 const app = express();
-
 const db = 'mongodb+srv://Umaima:auwalhajara@cluster0.qbt0pxi.mongodb.net/Node?retryWrites=true&w=majority'
-
-mongoose.connect(db,{useNewUrlparser:true, UseUnifiedTopology:
-true}).then((result) =>{
-    console.group('listen to port @ 8080');
+// const db = 'mongodb://127.0.0.1:27017/Node?directConnection=true&serverSelectionTimeoutMS=2000&appName=mongosh+2.1.0'
+mongoose.connect(db, {useNewUrlParser: true, useUnifiedTopology:true})
+.then((result)=> {
+    console.log('listening to port 8080');
     app.listen(8080);
-}).catch((err) =>console.log(err))
+})
+.catch((err)=> console.log(err))
 
-// app.listen(8080);
+
 
 app.set('view engine', 'ejs');
 
 //== use of morgan==//
-app.use(morgan('dev'))
- 
+app.use(morgan('dev'));
+
 // static file
 app.use(express.static('public'));
 app.use(express.urlencoded({extended: true}))
@@ -38,11 +38,11 @@ app.use((req,res,next)=>{
 })
 //==end of use of morgan middleware==//
 
- /////////testing db
- app.get('/add-blog', (req, res) =>{
-    const blog = new Blog({
+/////testing Database
+app.get('/add-blog', (req,res)=>{
+    const blog = new Blog( {
         title: 'new blog 3',
-        Snippet: 'About new blog',
+        snippet: 'About new blog',
         body: 'More about new blog'
     })
     blog.save().then(result =>{
@@ -51,71 +51,86 @@ app.use((req,res,next)=>{
     .catch(err =>{
         console.log(err)
     })
- });
+});
 
- app.get('/all-blogs',(req,res) =>{
+///end of testing
+app.get('/', (req,res)=>{
+    res.redirect('/blogs');
+})
+
+
+app.get('/all-blogs', (req,res)=>{
     Blog.find().then(result =>{
         res.send(result);
     }).catch(err =>{
-        console.log(err);
+        console.log(err)
     })
- });
-app.get('/single-blog', (req,res) => {
-    Blog.findById('655282b1f097e5ed5394df99')
-    .then((result) => {
+});
+
+app.get('/single-blog', (req,res)=>{
+    Blog.findById('655282b1f097e5ed5394df99').then((result)=>{
         res.send(result);
-    })
-    .catch((err) => {
+    }).catch((err)=>{
         console.log(err);
-    }); 
+    })
 })
 
-
-////////////////===========////////////
-app.get('/', (req,res) => {
-    res.redirect('/blogs');
-})
+//=====
 app.get('/about', (req,res)=>{
     res.render('about', {title: 'about'})
 })
-app.get('/blogs/create', (req,res) =>{
-res.render('create',{title: 'Create new blog'})
+
+app.get('/blog/create', (req,res)=>{
+    res.render('create',{title: 'Create new blog'})
 });
-app.get('/blogs', (req,res) =>{
-    Blog.find().then(result => {
-        res.render('index',{blogs: result, title: 'All blogs'})
-    }).catch(err => {
-        console.log(err)
-    })
-});
-// form
-app.post('/blogs', (req,res) =>{
-    console.log(req.body);
-// const {title} = req.body
-    const blog = new Blog(req.body)
-    blog.save().then(result =>{
-        res.redirect('/blogs')
-    }).catch(err => {
+
+app.get('/blogs', (req,res)=>{
+    Blog.find().then(result =>{
+        res.render('index', {blogs: result,title: 'All blogs'})
+    }).catch(err =>{
         console.log(err);
     })
 });
-app.get('/blogs/:id', (req,res) => {
-    const id = req.params.id;
-    Blog.findById(id).then(result => {
-        res.render('detail',{blog: result, title: 'Blog Detail'});
-
-
-    }).catch(err => {
-            console.log(err);
-        });
-})
-// delete
-app.delete('/blogs/:id', (req,res) => {
-    const id = req.params.id;
-    Blog.findByIdAndDelete(id).then(result => res.json({redirect: '/blogs'})).catch(err => {
+// 
+app.post('/blogs',(req,res)=>{
+    console.log(req.body);
+    const blog = new Blog(req.body);
+    blog.save().then(result => {
+        res.redirect('/blogs')
+    }).catch(err =>{
         console.log(err)
     })
+});
+
+app.get('/blogs/:id', (req,res)=>{
+        const id = req.params.id;
+        Blog.findById(id).then(result =>{
+        res.render('detail',{blog: result, title: 'Blog detail'});
+        })
+        .catch(err =>{
+            console.log(err);
+        });
+    })
+
+//delete
+app.delete('/blogs/:id',(req,res)=>{
+    const id =req.params.id;
+    Blog.findByIdAndDelete(id).then(result => res.json({redirect:'/blogs'})).catch(err=>{
+        console.log(err);
+    })
+})   
+app.get('/blog/contact', (req,res)=>{
+    res.render('contact', {title: 'contact page'})
+}) 
+
+app.get('/blog/login',(req,res)=>{
+    res.render('login', {title: 'login page'})
 })
+
+app.use((req,res)=>{
+    res.status(404).render('404', {title: 'Page not found'})
+})
+//====
 // app.get('/',(req,res)=>{
 //     const blogs = [
 //         {title: 'Nodejs class', snippet: 'this is nodejs class'},
@@ -125,25 +140,11 @@ app.delete('/blogs/:id', (req,res) => {
 //     res.render('index', {title: 'Home', blogs})
 // })
 
-// app.get('/about', (req,res)=>{
-//     res.render('about', {title: 'about'})
-// })
 
-// app.get('/blogs/create', (req,res)=>{
-//     res.render('create', {title: 'create new blog'})
-// })
 
-// app.get('/blogs/contact', (req,res)=>{
-//     res.render('contact', {title: 'contact page'})
-// })
 
-// app.get('/blogs/login',(req,res)=>{
-//     res.render('login', {title: 'login page'})
-// })
 
-app.use((req,res)=>{
-    res.status(404).render('404', {title: 'Page not found'})
- })
+
 
 
 
@@ -169,4 +170,3 @@ app.use((req,res)=>{
 // app.use((req,res)=>{
 //     res.sendFile('./views/404.html', {root: __dirname})
 // })
-
